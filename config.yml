@@ -52,9 +52,9 @@ jobs:
           name: Build cache
           no_output_timeout: 30m
           command: |
-             # Write 200MB worth of content into a cache. Can be 2GB or any value really
+             # Write 2GB worth of data into a cache
              mkdir /tmp/cache-entry
-             head -c 200000000 </dev/urandom > /tmp/cache-entry/cache-file-$CIRCLE_NODE_INDEX
+             head -c 2000000000 </dev/urandom > /tmp/cache-entry/cache-file-$CIRCLE_NODE_INDEX
       - save_cache:
           name: Saving file to cache
           key: v1-realitycheck-xlarge-file-{{ .Environment.CIRCLE_SHA }}
