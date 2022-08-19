@@ -42,11 +42,17 @@ jobs:
     executor: default
     steps:
       - basic-setup
+       - run: 
+         name: do cool things in the background if necessary
+         command: |
+              echo "cool things happen here..it takes 3 seconds in this scenario"
+              sleep 3
+         background: true
       - run:
           name: Build cache
           no_output_timeout: 30m
           command: |
-             # Write 200MB worth of content into a cache
+             # Write 200MB worth of content into a cache. Can be 2GB or any value really
              mkdir /tmp/cache-entry
              head -c 200000000 </dev/urandom > /tmp/cache-entry/cache-file-$CIRCLE_NODE_INDEX
       - save_cache:
@@ -54,12 +60,6 @@ jobs:
           key: v1-realitycheck-xlarge-file-{{ .Environment.CIRCLE_SHA }}
           paths:
            - /tmp/cache-entry
-      - run: 
-         name: build a cache and trigger wf when ready
-         command: |
-              echo "Something will happen here that will take n seconds..3 in this scenario"
-              sleep 3
-         background: true
       - run:
          name: use api to trigger the publish-wf
          command: |
