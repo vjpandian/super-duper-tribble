@@ -13,7 +13,7 @@ executors:
 
 commands:
   basic-setup:
-    description: "basic command for setup"
+    description: "basic command for setup.."
     steps:
        - run: echo "hello"
 
