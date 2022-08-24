@@ -1,0 +1,158 @@
+version: 2.1
+
+parameters:
+  workflow:
+    type: string
+    default: "default"
+
+executors:
+  default:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+
+commands:
+  basic-setup:
+    description: "basic command for setup"
+    steps:
+       - run: echo "hello"
+
+jobs:
+  ci-branch-setup:
+    executor: default
+    steps:
+      - basic-setup
+
+  ci-django-linter:
+    executor: default
+    steps:
+      - basic-setup
+  
+  ci-django-test:
+    executor: default
+    steps:
+      - basic-setup
+  
+  ci-react-autoformat:
+    executor: default
+    steps:
+      - basic-setup
+
+  ci-react-build:
+    executor: default
+    steps:
+      - basic-setup
+       - run: 
+         name: do cool things in the background if necessary
+         command: |
+              echo "cool things happen here..it takes 3 seconds in this scenario"
+              sleep 3
+         background: true
+      - run:
+          name: Build cache
+          no_output_timeout: 30m
+          command: |
+             # Write 2GB worth of data into a cache
+             mkdir /tmp/cache-entry
+             head -c 20000000 </dev/urandom > /tmp/cache-entry/cache-file-$CIRCLE_NODE_INDEX
+      - save_cache:
+          name: Saving file to cache
+          key: v1-realitycheck-xlarge-file-{{ .Environment.CIRCLE_SHA }}
+          paths:
+           - /tmp/cache-entry
+      - run:
+         name: use api to trigger the publish-wf
+         command: |
+              echo "When this process completes...I have what I need and my other jobs can proceed...triggering those jobs now"
+              curl --request POST \
+              --url https://circleci.com/api/v2/project/gh/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/pipeline \
+              --header "Circle-Token: $CIRCLE_TOKEN" \
+              --header 'content-type: application/json' \
+              --data '{"branch":"circleci-editor/main","parameters":{"workflow":"publish"}}'
+      - run: | 
+          echo "Run e2e tests which will not have to wait for the cache being built in the background"
+          sleep 10 # Lets assume this takes 10 seconds in this scenario
+         
+  
+  ci-react-linter:
+    executor: default
+    steps:
+      - basic-setup
+
+  ci-react-test:
+    executor: default
+    steps:
+      - basic-setup
+
+  ci-build-docs:
+    executor: default
+    steps:
+      - basic-setup
+  
+  ci-entrypoints:
+    executor: default
+    steps:
+      - basic-setup
+      - restore_cache:
+          name: Restoring cache written in the main workflow
+          keys:
+          - v1-realitycheck-xlarge-file-{{ .Environment.CIRCLE_SHA }}
+      - run: echo "Going to do things with this cache"
+
+  storybook:
+    executor: default
+    steps:
+      - basic-setup
+
+  publish:
+    executor: default
+    steps:
+      - basic-setup
+    
+
+workflows:
+  main:
+     when:
+        and:
+          - equal: [ circleci-editor/main, << pipeline.git.branch >> ]
+          - equal: [ default, << pipeline.parameters.workflow >> ]
+          - equal: [ webhook, << pipeline.trigger_source >>]
+          - or: [ api, << pipeline.trigger_source >> ]
+        
+     jobs:
+      - ci-branch-setup
+      - ci-react-linter:
+           requires:
+             - ci-branch-setup 
+      - ci-react-test:
+          requires:
+            - ci-branch-setup 
+      - ci-react-autoformat:
+          requires:
+            - ci-branch-setup 
+      - ci-react-build:
+          requires:
+            - ci-branch-setup 
+      - ci-django-test:
+          requires:
+            - ci-branch-setup 
+      - ci-django-linter:
+          requires:
+            - ci-branch-setup 
+      - ci-build-docs:
+          requires:
+            - ci-branch-setup 
+            
+  publish-wf:
+      when:
+        and:
+          - equal: [ circleci-editor/main, << pipeline.git.branch >> ]
+          - equal: [ publish, << pipeline.parameters.workflow >> ]
+          - equal: [ api, << pipeline.trigger_source >>]
+      jobs:
+         - ci-entrypoints
+         - storybook
+         - publish:
+             requires:
+               - ci-entrypoints
+               - storybook
