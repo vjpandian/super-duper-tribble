@@ -131,6 +131,7 @@ workflows:
           requires:
             - ci-branch-setup 
       - ci-react-build:
+          context: org-global
           requires:
             - ci-branch-setup 
       - ci-django-test:
