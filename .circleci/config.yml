@@ -68,7 +68,7 @@ jobs:
             --url https://circleci.com/api/v2/project/gh/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/pipeline \
             --header "Circle-Token: $CIRCLE_TOKEN" \
             --header 'content-type: application/json' \
-            --data '{"branch":"circleci-editor/main","parameters":{"workflow":"publish"}}'
+            --data '{"branch":"main","parameters":{"workflow":"publish"}}'
     - run: | 
         echo "Run e2e tests which will not have to wait for the cache being built in the background"
         sleep 10 # Lets assume this takes 10 seconds in this scenario
@@ -114,7 +114,7 @@ workflows:
   main:
      when:
         and:
-          - equal: [ circleci-editor/main, << pipeline.git.branch >> ]
+          - equal: [ main, << pipeline.git.branch >> ]
           - equal: [ default, << pipeline.parameters.workflow >> ]
           - equal: [ webhook, << pipeline.trigger_source >>]
           - or: [ api, << pipeline.trigger_source >> ]
@@ -146,7 +146,7 @@ workflows:
   publish-wf:
       when:
         and:
-          - equal: [ circleci-editor/main, << pipeline.git.branch >> ]
+          - equal: [ main, << pipeline.git.branch >> ]
           - equal: [ publish, << pipeline.parameters.workflow >> ]
           - equal: [ api, << pipeline.trigger_source >>]
       jobs:
