@@ -41,38 +41,38 @@ jobs:
   ci-react-build:
     executor: default
     steps:
-      - basic-setup
-       - run: 
-         name: do cool things in the background if necessary
-         command: |
-              echo "cool things happen here..it takes 3 seconds in this scenario"
-              sleep 3
-         background: true
-      - run:
-          name: Build cache
-          no_output_timeout: 30m
-          command: |
-             # Write 2GB worth of data into a cache
-             mkdir /tmp/cache-entry
-             head -c 20000000 </dev/urandom > /tmp/cache-entry/cache-file-$CIRCLE_NODE_INDEX
-      - save_cache:
-          name: Saving file to cache
-          key: v1-realitycheck-xlarge-file-{{ .Environment.CIRCLE_SHA }}
-          paths:
-           - /tmp/cache-entry
-      - run:
-         name: use api to trigger the publish-wf
-         command: |
-              echo "When this process completes...I have what I need and my other jobs can proceed...triggering those jobs now"
-              curl --request POST \
-              --url https://circleci.com/api/v2/project/gh/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/pipeline \
-              --header "Circle-Token: $CIRCLE_TOKEN" \
-              --header 'content-type: application/json' \
-              --data '{"branch":"circleci-editor/main","parameters":{"workflow":"publish"}}'
-      - run: | 
-          echo "Run e2e tests which will not have to wait for the cache being built in the background"
-          sleep 10 # Lets assume this takes 10 seconds in this scenario
-         
+    - basic-setup
+    - run: 
+        name: do cool things in the background if necessary
+        command: |
+             echo "cool things happen here..it takes 3 seconds in this scenario"
+             sleep 3
+        background: true
+    - run:
+        name: Build cache
+        no_output_timeout: 30m
+        command: |
+           # Write 2GB worth of data into a cache
+           mkdir /tmp/cache-entry
+           head -c 20000000 </dev/urandom > /tmp/cache-entry/cache-file-$CIRCLE_NODE_INDEX
+    - save_cache:
+        name: Saving file to cache
+        key: v1-realitycheck-xlarge-file-{{ .Environment.CIRCLE_SHA }}
+        paths:
+         - /tmp/cache-entry
+    - run:
+       name: use api to trigger the publish-wf
+       command: |
+            echo "When this process completes...I have what I need and my other jobs can proceed...triggering those jobs now"
+            curl --request POST \
+            --url https://circleci.com/api/v2/project/gh/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/pipeline \
+            --header "Circle-Token: $CIRCLE_TOKEN" \
+            --header 'content-type: application/json' \
+            --data '{"branch":"circleci-editor/main","parameters":{"workflow":"publish"}}'
+    - run: | 
+        echo "Run e2e tests which will not have to wait for the cache being built in the background"
+        sleep 10 # Lets assume this takes 10 seconds in this scenario
+        
   
   ci-react-linter:
     executor: default
