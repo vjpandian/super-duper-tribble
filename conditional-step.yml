@@ -11,11 +11,16 @@ jobs:
         - image: cimg/base:stable
       steps:
            - when:
-               condition:  
+               condition:
                  equal: [ "prod", << pipeline.parameters.environment >> ]
                steps:
                  - checkout
-                 - run: echo "this will run when env value matches prod"
+                 - run: echo "this will run when env value is prod"
+           - when:
+               condition:
+                 equal: [ "dev", << pipeline.parameters.environment >> ]
+               steps:
+                 - run: echo "run this when env value is dev"
            - run: echo "this will run always"
                  
 workflows:
