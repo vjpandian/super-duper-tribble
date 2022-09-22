@@ -78,7 +78,6 @@ jobs:
             
 workflows:
   server4-helm-deploy:
-    when: << pipeline.parameters.helm-deploy >>
     jobs:
       - deploy-helm-chart:
            context: server
