@@ -44,7 +44,8 @@ jobs:
               curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
               sudo mv /tmp/eksctl /usr/local/bin
               eksctl version
-              mv server-helm/support-values.yaml .
+              aws configure set aws_access_key_id $AWS_ACCESS_KEY; aws configure set aws_secret_access_key $AWS_SECRET_KEY; aws configure set default.region us-east-1 
+              
       - run:
           name: Login to Azure and Pull Helm Charts
           command: |
