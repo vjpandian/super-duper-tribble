@@ -10,10 +10,10 @@ jobs:
       docker:
         - image: cimg/base:stable
       steps:
-           - run: echo "run always"
+           - run: exit 1
            - run:
                name: "Run on Failure"
-               command: echo "this will run only on failure"
+               command: exit 0
                when: on_fail
            - run: 
                name: "Run on Success"
