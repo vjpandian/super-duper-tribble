@@ -10,7 +10,6 @@ spec:
       selector:
       - layer=application
       name: application
-      timeout: 600s
   - logs:
       selector:
       - layer=data
